@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/cmd/token-bind-tool/const"
 	"math/big"
 	"time"
 
@@ -26,8 +27,8 @@ func GetTransactor(ethClient *ethclient.Client, keyStore *keystore.KeyStore, acc
 	txOpts, _ := bind.NewKeyStoreTransactor(keyStore, account)
 	txOpts.Nonce = big.NewInt(int64(nonce))
 	txOpts.Value = value
-	txOpts.GasLimit = DefaultGasLimit
-	txOpts.GasPrice = big.NewInt(DefaultGasPrice)
+	txOpts.GasLimit = _const.DefaultGasLimit
+	txOpts.GasPrice = big.NewInt(_const.DefaultGasPrice)
 	return txOpts
 }
 
@@ -40,12 +41,12 @@ func GetCallOpts() *bind.CallOpts {
 }
 
 func DeployBEP20Contract(ethClient *ethclient.Client, wallet *keystore.KeyStore, account accounts.Account, contractData hexutil.Bytes, chainId *big.Int) (common.Hash, error) {
-	gasLimit := hexutil.Uint64(DefaultGasLimit)
+	gasLimit := hexutil.Uint64(_const.DefaultGasLimit)
 	nonce, err := ethClient.PendingNonceAt(context.Background(), account.Address)
 	if err != nil {
 		return common.Hash{}, err
 	}
-	gasPrice := hexutil.Big(*big.NewInt(DefaultGasPrice))
+	gasPrice := hexutil.Big(*big.NewInt(_const.DefaultGasPrice))
 	nonceUint64 := hexutil.Uint64(nonce)
 	sendTxArgs := &ethapi.SendTxArgs{
 		From:     account.Address,
@@ -65,12 +66,12 @@ func DeployBEP20Contract(ethClient *ethclient.Client, wallet *keystore.KeyStore,
 }
 
 func SendBNBToTempAccount(rpcClient *ethclient.Client, wallet accounts.Wallet, account accounts.Account, recipient common.Address, amount *big.Int, chainId *big.Int) error {
-	gasLimit := hexutil.Uint64(DefaultGasLimit)
+	gasLimit := hexutil.Uint64(_const.DefaultGasLimit)
 	nonce, err := rpcClient.PendingNonceAt(context.Background(), account.Address)
 	if err != nil {
 		return err
 	}
-	gasPrice := hexutil.Big(*big.NewInt(DefaultGasPrice))
+	gasPrice := hexutil.Big(*big.NewInt(_const.DefaultGasPrice))
 	amountBig := hexutil.Big(*amount)
 	nonceUint64 := hexutil.Uint64(nonce)
 	sendTxArgs := &ethapi.SendTxArgs{
@@ -92,7 +93,10 @@ func SendBNBToTempAccount(rpcClient *ethclient.Client, wallet accounts.Wallet, a
 
 func SendAllRestBNB(ethClient *ethclient.Client, wallet *keystore.KeyStore, account accounts.Account, recipient common.Address, chainId *big.Int) (common.Hash, error) {
 	restBalance, _ := ethClient.BalanceAt(context.Background(), account.Address, nil)
-	txFee := big.NewInt(1).Mul(big.NewInt(21000), big.NewInt(DefaultGasPrice))
+	txFee := big.NewInt(1).Mul(big.NewInt(21000), big.NewInt(_const.DefaultGasPrice))
+	if restBalance.Cmp(txFee) < 0 {
+		return common.Hash{}, fmt.Errorf("rest BNB %s is less than minimum transfer transaction fee %s", restBalance.String(), txFee.String())
+	}
 	amount := big.NewInt(1).Sub(restBalance, txFee)
 	fmt.Println(fmt.Sprintf("rest balance %s, transfer BNB tx fee %s, transfer %s back to %s", restBalance.String(), txFee.String(), amount.String(), recipient.String()))
 	gasLimit := hexutil.Uint64(21000)
@@ -100,7 +104,7 @@ func SendAllRestBNB(ethClient *ethclient.Client, wallet *keystore.KeyStore, acco
 	if err != nil {
 		return common.Hash{}, err
 	}
-	gasPrice := hexutil.Big(*big.NewInt(DefaultGasPrice))
+	gasPrice := hexutil.Big(*big.NewInt(_const.DefaultGasPrice))
 	amountBig := hexutil.Big(*amount)
 	nonceUint64 := hexutil.Uint64(nonce)
 	sendTxArgs := &ethapi.SendTxArgs{
@@ -134,28 +138,28 @@ func toTransaction(args *ethapi.SendTxArgs) *types.Transaction {
 }
 
 func PrintTxExplorerUrl(msg, txHash string, chainID *big.Int) {
-	if chainID.Cmp(big.NewInt(MainnetChainID)) == 0 {
-		fmt.Println(fmt.Sprintf(MainnetExplorerTxUrl, msg, txHash))
+	if chainID.Cmp(big.NewInt(_const.MainnetChainID)) == 0 {
+		fmt.Println(fmt.Sprintf(_const.MainnetExplorerTxUrl, msg, txHash))
 	} else {
-		fmt.Println(fmt.Sprintf(TestnetExplorerTxUrl, msg, txHash))
+		fmt.Println(fmt.Sprintf(_const.TestnetExplorerTxUrl, msg, txHash))
 	}
 }
 
 func PrintAddrExplorerUrl(msg, address string, chainID *big.Int) {
-	if chainID.Cmp(big.NewInt(MainnetChainID)) == 0 {
-		fmt.Println(fmt.Sprintf(MainnetExplorerAddressUrl, msg, address))
+	if chainID.Cmp(big.NewInt(_const.MainnetChainID)) == 0 {
+		fmt.Println(fmt.Sprintf(_const.MainnetExplorerAddressUrl, msg, address))
 	} else {
-		fmt.Println(fmt.Sprintf(TestnetExplorerAddressUrl, msg, address))
+		fmt.Println(fmt.Sprintf(_const.TestnetExplorerAddressUrl, msg, address))
 	}
 }
 
 func SendTransactionFromLedger(rpcClient *ethclient.Client, wallet accounts.Wallet, account accounts.Account, recipient common.Address, value *big.Int, data *hexutil.Bytes, chainId *big.Int) (*types.Transaction, error) {
-	gasLimit := hexutil.Uint64(DefaultGasLimit)
+	gasLimit := hexutil.Uint64(_const.DefaultGasLimit)
 	nonce, err := rpcClient.PendingNonceAt(context.Background(), account.Address)
 	if err != nil {
 		return nil, err
 	}
-	gasPrice := hexutil.Big(*big.NewInt(DefaultGasPrice))
+	gasPrice := hexutil.Big(*big.NewInt(_const.DefaultGasPrice))
 	valueBig := hexutil.Big(*value)
 	nonceUint64 := hexutil.Uint64(nonce)
 	sendTxArgs := &ethapi.SendTxArgs{

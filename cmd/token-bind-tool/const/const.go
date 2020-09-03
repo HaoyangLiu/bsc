@@ -1,4 +1,4 @@
-package utils
+package _const
 
 const (
 	Passwd              = "12345678"
@@ -8,10 +8,9 @@ const (
 	Operation           = "operation"
 	BEP20ContractAddr   = "bep20-contract-addr"
 	BEP2Symbol          = "bep2-symbol"
-	LedgerAccount       = "ledger-account"
-	LedgerAccountNumber = "ledger-account-number"
-	LedgerAccountIndex  = "ledger-account-index"
+	Recipient           = "recipient"
 	PeggyAmount         = "peggy-amount"
+	LedgerAccountIndex  = "ledger-account-index"
 
 	InitKey               = "initKey"
 	RefundRestBNB         = "refundRestBNB"
@@ -40,4 +39,6 @@ const (
 
 	MainnetExplorerAddressUrl = "%s: https://bscscan.com/address/%s"
 	TestnetExplorerAddressUrl = "%s: https://testnet.bscscan.com/address/%s"
+
+	BSCAddrLength = 42
 )

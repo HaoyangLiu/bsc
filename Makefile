@@ -17,6 +17,10 @@ geth:
 	@echo "Done building."
 	@echo "Run \"$(GOBIN)/geth\" to launch geth."
 
+token_bind_tool:
+	$(GORUN) build/ci.go install ./cmd/token-bind-tool
+	@echo "Done building."
+
 all:
 	$(GORUN) build/ci.go install
 
